@@ -8,15 +8,15 @@ Software developer passionate about building innovative solutions and maintainin
 
 <!-- CONTRIBUTION_START -->
 ### This Week's Activity
-- **Commits**: 5
+- **Commits**: 0
 - **Pull Requests**: 0  
 - **Issues Closed**: 0
 - **Code Reviews**: 0
 
 ### Health & Productivity Sync
-- **Steps**: *Syncing from Apple Health...*
-- **Active Hours**: *Calculating...*
-- **Workout Sessions**: *Loading...*
+- **Steps**: 52,000
+- **Active Hours**: 21h
+- **Workout Sessions**: 5
 
 <!-- CONTRIBUTION_END -->
 
