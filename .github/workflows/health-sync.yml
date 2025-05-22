@@ -1,0 +1,58 @@
+name: Real-time Health Data Sync
+
+on:
+  repository_dispatch:
+    types: [health-update]
+  workflow_dispatch:
+    inputs:
+      steps:
+        description: 'Daily steps'
+        required: false
+        default: '0'
+      active_energy:
+        description: 'Active energy burned'
+        required: false
+        default: '0'
+      workouts:
+        description: 'Workout count'
+        required: false
+        default: '0'
+
+jobs:
+  sync-health-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Update README with Health Data
+      run: |
+        # Get data from workflow inputs or repository dispatch
+        if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+          STEPS="${{ github.event.client_payload.steps }}"
+          ENERGY="${{ github.event.client_payload.active_energy }}"
+          WORKOUTS="${{ github.event.client_payload.workouts }}"
+        else
+          STEPS="${{ github.event.inputs.steps }}"
+          ENERGY="${{ github.event.inputs.active_energy }}"
+          WORKOUTS="${{ github.event.inputs.workouts }}"
+        fi
+        
+        # Update README
+        sed -i "s/\*\*Steps\*\*: .*/\*\*Steps\*\*: ${STEPS}/" README.md
+        sed -i "s/\*\*Active Hours\*\*: .*/\*\*Active Hours\*\*: $((ENERGY/100))h/" README.md
+        sed -i "s/\*\*Workout Sessions\*\*: .*/\*\*Workout Sessions\*\*: ${WORKOUTS}/" README.md
+        
+        # Update timestamp
+        DATE=$(date '+%Y-%m-%d %H:%M UTC')
+        sed -i "s/\*Last updated by AI Assistant: .*/\*Last updated by AI Assistant: ${DATE}\*/" README.md
+        
+    - name: Commit changes
+      run: |
+        git config --local user.email "health-sync@github.com"
+        git config --local user.name "Health Data Sync"
+        git add README.md
+        git diff --staged --quiet || git commit -m "📱 Real-time health data sync - $(date '+%H:%M')"
+        git push
