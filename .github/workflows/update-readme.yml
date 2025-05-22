@@ -18,49 +18,22 @@ jobs:
       with:
         fetch-depth: 0
         
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
+    - name: Setup Python
+      uses: actions/setup-python@v4
       with:
-        node-version: '18'
+        python-version: '3.9'
         
-    - name: Fetch GitHub Stats
-      id: github-stats
+    - name: Install dependencies
       run: |
-        # Get recent commits
-        COMMITS=$(git log --since="7 days ago" --oneline | wc -l)
-        echo "commits=$COMMITS" >> $GITHUB_OUTPUT
+        python -m pip install --upgrade pip
+        pip install requests
         
-        # Get GitHub API data
-        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-             -H "Accept: application/vnd.github.v3+json" \
-             "https://api.github.com/users/${{ github.actor }}/events?per_page=100" \
-             -o events.json
-             
-        # Parse events for PRs, issues, etc.
-        PRS=$(jq '[.[] | select(.type == "PullRequestEvent")] | length' events.json)
-        ISSUES=$(jq '[.[] | select(.type == "IssuesEvent")] | length' events.json)
-        
-        echo "prs=$PRS" >> $GITHUB_OUTPUT
-        echo "issues=$ISSUES" >> $GITHUB_OUTPUT
-        
-    - name: Generate AI Summary
-      id: ai-summary
+    - name: Run README updater
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_ACTOR: ${{ github.actor }}
       run: |
-        # This would integrate with Claude/GPT API for generating summaries
-        SUMMARY="Week progress: ${{ steps.github-stats.outputs.commits }} commits, ${{ steps.github-stats.outputs.prs }} PRs"
-        echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
-        
-    - name: Update README
-      run: |
-        DATE=$(date '+%Y-%m-%d %H:%M UTC')
-        
-        # Update contribution section
-        sed -i "s/\*\*Commits\*\*: [0-9]*/\*\*Commits\*\*: ${{ steps.github-stats.outputs.commits }}/" README.md
-        sed -i "s/\*\*Pull Requests\*\*: [0-9]*/\*\*Pull Requests\*\*: ${{ steps.github-stats.outputs.prs }}/" README.md
-        sed -i "s/\*\*Issues Closed\*\*: [0-9]*/\*\*Issues Closed\*\*: ${{ steps.github-stats.outputs.issues }}/" README.md
-        
-        # Update timestamp
-        sed -i "s/{{ date }}/$DATE/" README.md
+        python scripts/update_readme.py
         
     - name: Commit changes
       run: |
