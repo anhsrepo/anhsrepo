@@ -1,0 +1,234 @@
+{
+  "WFWorkflowMajorVersion": 1,
+  "WFWorkflowMinorVersion": 7,
+  "WFWorkflowIcon": {
+    "WFWorkflowIconStartColor": 2251764224,
+    "WFWorkflowIconGlyphNumber": 59511
+  },
+  "WFWorkflowClientVersion": "2302.0.4",
+  "WFWorkflowOutputContentItemClasses": [],
+  "WFWorkflowHasOutputFallback": false,
+  "WFWorkflowActions": [
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.health.quantity.get",
+      "WFWorkflowActionParameters": {
+        "WFHKQuantityType": "StepCount",
+        "WFHealthQuantityAdditionalFieldsAction": "WFHealthQuantityAdditionalFieldsActionDontInclude",
+        "WFHKGroupingIndexPath": [0, 0],
+        "WFHealthQuantityUnitPickerParameter": "count"
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.health.quantity.get",
+      "WFWorkflowActionParameters": {
+        "WFHKQuantityType": "ActiveEnergyBurned",
+        "WFHealthQuantityAdditionalFieldsAction": "WFHealthQuantityAdditionalFieldsActionDontInclude",
+        "WFHKGroupingIndexPath": [0, 0],
+        "WFHealthQuantityUnitPickerParameter": "cal"
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.health.workout.get",
+      "WFWorkflowActionParameters": {
+        "WFHKGroupingIndexPath": [0, 0]
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.getnumbers",
+      "WFWorkflowActionParameters": {
+        "WFInput": {
+          "Value": {
+            "OutputUUID": "01234567-89AB-CDEF-0123-456789ABCDEF",
+            "Type": "ActionOutput",
+            "OutputName": "Health Samples"
+          },
+          "WFSerializationType": "WFActionOutput"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.getnumbers",
+      "WFWorkflowActionParameters": {
+        "WFInput": {
+          "Value": {
+            "OutputUUID": "01234567-89AB-CDEF-0123-456789ABCDEF",
+            "Type": "ActionOutput",
+            "OutputName": "Health Samples"
+          },
+          "WFSerializationType": "WFActionOutput"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.count",
+      "WFWorkflowActionParameters": {
+        "Input": {
+          "Value": {
+            "OutputUUID": "01234567-89AB-CDEF-0123-456789ABCDEF",
+            "Type": "ActionOutput",
+            "OutputName": "Workouts"
+          },
+          "WFSerializationType": "WFActionOutput"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.downloadurl",
+      "WFWorkflowActionParameters": {
+        "WFURL": "https://api.github.com/repos/anhngit/anhngit/dispatches",
+        "WFHTTPMethod": "POST",
+        "WFHTTPHeaders": {
+          "Value": {
+            "WFDictionaryFieldValueItems": [
+              {
+                "WFItemType": 0,
+                "WFKey": {
+                  "Value": {
+                    "string": "Authorization"
+                  },
+                  "WFSerializationType": "WFTextTokenString"
+                },
+                "WFValue": {
+                  "Value": {
+                    "string": "token YOUR_GITHUB_TOKEN_HERE"
+                  },
+                  "WFSerializationType": "WFTextTokenString"
+                }
+              },
+              {
+                "WFItemType": 0,
+                "WFKey": {
+                  "Value": {
+                    "string": "Accept"
+                  },
+                  "WFSerializationType": "WFTextTokenString"
+                },
+                "WFValue": {
+                  "Value": {
+                    "string": "application/vnd.github.v3+json"
+                  },
+                  "WFSerializationType": "WFTextTokenString"
+                }
+              }
+            ]
+          },
+          "WFSerializationType": "WFDictionaryFieldValue"
+        },
+        "WFHTTPBodyType": "JSON",
+        "WFJSONValues": {
+          "Value": {
+            "WFDictionaryFieldValueItems": [
+              {
+                "WFItemType": 0,
+                "WFKey": {
+                  "Value": {
+                    "string": "event_type"
+                  },
+                  "WFSerializationType": "WFTextTokenString"
+                },
+                "WFValue": {
+                  "Value": {
+                    "string": "health-update"
+                  },
+                  "WFSerializationType": "WFTextTokenString"
+                }
+              },
+              {
+                "WFItemType": 0,
+                "WFKey": {
+                  "Value": {
+                    "string": "client_payload"
+                  },
+                  "WFSerializationType": "WFTextTokenString"
+                },
+                "WFValue": {
+                  "Value": {
+                    "WFDictionaryFieldValueItems": [
+                      {
+                        "WFItemType": 0,
+                        "WFKey": {
+                          "Value": {
+                            "string": "steps"
+                          },
+                          "WFSerializationType": "WFTextTokenString"
+                        },
+                        "WFValue": {
+                          "Value": {
+                            "OutputUUID": "STEPS_OUTPUT_UUID",
+                            "Type": "ActionOutput"
+                          },
+                          "WFSerializationType": "WFActionOutput"
+                        }
+                      },
+                      {
+                        "WFItemType": 0,
+                        "WFKey": {
+                          "Value": {
+                            "string": "active_energy"
+                          },
+                          "WFSerializationType": "WFTextTokenString"
+                        },
+                        "WFValue": {
+                          "Value": {
+                            "OutputUUID": "ENERGY_OUTPUT_UUID",
+                            "Type": "ActionOutput"
+                          },
+                          "WFSerializationType": "WFActionOutput"
+                        }
+                      },
+                      {
+                        "WFItemType": 0,
+                        "WFKey": {
+                          "Value": {
+                            "string": "workouts"
+                          },
+                          "WFSerializationType": "WFTextTokenString"
+                        },
+                        "WFValue": {
+                          "Value": {
+                            "OutputUUID": "WORKOUTS_OUTPUT_UUID",
+                            "Type": "ActionOutput"
+                          },
+                          "WFSerializationType": "WFActionOutput"
+                        }
+                      }
+                    ]
+                  },
+                  "WFSerializationType": "WFDictionaryFieldValue"
+                }
+              }
+            ]
+          },
+          "WFSerializationType": "WFDictionaryFieldValue"
+        }
+      }
+    }
+  ],
+  "WFWorkflowInputContentItemClasses": [
+    "WFAppContentItem",
+    "WFAppStoreAppContentItem",
+    "WFArticleContentItem",
+    "WFContactContentItem",
+    "WFDateContentItem",
+    "WFEmailAddressContentItem",
+    "WFGenericFileContentItem",
+    "WFImageContentItem",
+    "WFiTunesProductContentItem",
+    "WFLocationContentItem",
+    "WFDCMapsLinkContentItem",
+    "WFAVAssetContentItem",
+    "WFPDFContentItem",
+    "WFPhoneNumberContentItem",
+    "WFRichTextContentItem",
+    "WFSafariWebPageContentItem",
+    "WFStringContentItem",
+    "WFURLContentItem"
+  ],
+  "WFWorkflowImportQuestions": [],
+  "WFWorkflowTypes": [
+    "NCWidget",
+    "WatchKit"
+  ],
+  "WFQuickActionSurfaces": [],
+  "WFWorkflowHasShortcutInputVariables": false
+}
