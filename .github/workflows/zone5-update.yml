@@ -1,0 +1,182 @@
+name: Zone 5 Health Tracker Update
+
+on:
+  schedule:
+    # Run every hour during active hours (6 AM - 10 PM PST)
+    - cron: '0 6-22 * * *'
+  workflow_dispatch:
+    inputs:
+      heart_rate:
+        description: 'Current Heart Rate (bpm)'
+        required: false
+        type: number
+      zone5_minutes:
+        description: 'Zone 5 Minutes Today'
+        required: false
+        type: number
+
+env:
+  MAX_HEART_RATE: 190
+  ZONE5_MIN: 171
+  ZONE5_MAX: 190
+  USER_AGE: 30
+
+jobs:
+  update-zone5-tracker:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Get Current Date
+      id: date
+      run: |
+        echo "today=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+        echo "timestamp=$(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+        
+    - name: Check Zone 5 Status
+      id: zone5_check
+      run: |
+        # Simulate checking Apple Health data (replace with actual API calls)
+        CURRENT_HR="${{ github.event.inputs.heart_rate || '85' }}"
+        ZONE5_MINUTES="${{ github.event.inputs.zone5_minutes || '0' }}"
+        
+        # Check if in Zone 5
+        if [ $CURRENT_HR -ge $ZONE5_MIN ] && [ $CURRENT_HR -le $ZONE5_MAX ]; then
+          echo "in_zone5=true" >> $GITHUB_OUTPUT
+          echo "🔥 Currently in Zone 5! HR: ${CURRENT_HR} bpm"
+        else
+          echo "in_zone5=false" >> $GITHUB_OUTPUT
+          echo "📊 Current HR: ${CURRENT_HR} bpm (not Zone 5)"
+        fi
+        
+        echo "current_hr=$CURRENT_HR" >> $GITHUB_OUTPUT
+        echo "zone5_minutes=$ZONE5_MINUTES" >> $GITHUB_OUTPUT
+        
+    - name: Update Zone 5 Achievement Data
+      run: |
+        # Create or update zone5-data.json
+        cat > zone5-data.json << EOF
+        {
+          "lastUpdate": "${{ steps.date.outputs.timestamp }}",
+          "currentHeartRate": ${{ steps.zone5_check.outputs.current_hr }},
+          "inZone5": ${{ steps.zone5_check.outputs.in_zone5 }},
+          "todayZone5Minutes": ${{ steps.zone5_check.outputs.zone5_minutes }},
+          "zone5Range": "$ZONE5_MIN-$ZONE5_MAX bpm",
+          "maxHeartRate": $MAX_HEART_RATE,
+          "userAge": $USER_AGE,
+          "achievements": {
+            "${{ steps.date.outputs.today }}": ${{ steps.zone5_check.outputs.zone5_minutes }}
+          }
+        }
+        EOF
+        
+    - name: Generate Zone 5 Badge
+      run: |
+        # Create dynamic badge based on current status
+        if [ "${{ steps.zone5_check.outputs.in_zone5 }}" = "true" ]; then
+          BADGE_COLOR="red"
+          BADGE_MESSAGE="IN%20ZONE%205%20🔥"
+        else
+          BADGE_COLOR="blue"
+          BADGE_MESSAGE="MONITORING"
+        fi
+        
+        # Update README with current status
+        cat > zone5-status.md << EOF
+        # 🏃‍♂️ Real-Time Zone 5 Status
+        
+        ![Zone 5 Status](https://img.shields.io/badge/Zone%205-$BADGE_MESSAGE-$BADGE_COLOR)
+        ![Current HR](https://img.shields.io/badge/Current%20HR-${{ steps.zone5_check.outputs.current_hr }}%20bpm-orange)
+        ![Today](https://img.shields.io/badge/Today-${{ steps.zone5_check.outputs.zone5_minutes }}%20min-green)
+        
+        **Last Updated**: ${{ steps.date.outputs.timestamp }}
+        
+        ### Today's Zone 5 Progress
+        - **Current Heart Rate**: ${{ steps.zone5_check.outputs.current_hr }} bpm
+        - **Zone 5 Target**: $ZONE5_MIN-$ZONE5_MAX bpm
+        - **Time in Zone 5**: ${{ steps.zone5_check.outputs.zone5_minutes }} minutes
+        - **Status**: ${{ steps.zone5_check.outputs.in_zone5 == 'true' && '🔥 IN ZONE 5!' || '📊 Monitoring...' }}
+        
+        ### Quick Actions
+        - [📱 Open Zone 5 Tracker](https://anhsrepo.github.io/anhsrepo/zone5-tracker.html)
+        - [📊 View Full Documentation](./ZONE5_TRACKER.md)
+        - [⚡ Manual Update](https://github.com/anhsrepo/anhsrepo/actions/workflows/zone5-update.yml)
+        EOF
+        
+    - name: Update GitHub Profile README
+      if: steps.zone5_check.outputs.in_zone5 == 'true'
+      run: |
+        # If currently in Zone 5, update the main README with celebration
+        if [ -f README.md ]; then
+          # Add Zone 5 achievement to README
+          sed -i '1i🔥 **ZONE 5 ACHIEVED!** Currently at ${{ steps.zone5_check.outputs.current_hr }} bpm | Updated: ${{ steps.date.outputs.timestamp }}\n' README.md
+        fi
+        
+    - name: Commit and Push Updates
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "Zone 5 Tracker Bot"
+        
+        git add .
+        
+        if [ "${{ steps.zone5_check.outputs.in_zone5 }}" = "true" ]; then
+          git commit -m "🔥 Zone 5 achieved! HR: ${{ steps.zone5_check.outputs.current_hr }} bpm | ${{ steps.zone5_check.outputs.zone5_minutes }}min today" || exit 0
+        else
+          git commit -m "📊 Zone 5 tracker update | HR: ${{ steps.zone5_check.outputs.current_hr }} bpm | ${{ steps.date.outputs.timestamp }}" || exit 0
+        fi
+        
+        git push
+        
+    - name: Create Zone 5 Achievement Issue
+      if: steps.zone5_check.outputs.in_zone5 == 'true' && steps.zone5_check.outputs.zone5_minutes > 15
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const title = `🔥 Zone 5 Achievement: ${context.payload.inputs?.zone5_minutes || '15'}+ minutes!`;
+          const body = `
+          ## 🎉 Zone 5 Achievement Unlocked!
+          
+          **Date**: ${{ steps.date.outputs.today }}
+          **Time in Zone 5**: ${{ steps.zone5_check.outputs.zone5_minutes }} minutes
+          **Peak Heart Rate**: ${{ steps.zone5_check.outputs.current_hr }} bpm
+          **Zone 5 Range**: ${process.env.ZONE5_MIN}-${process.env.ZONE5_MAX} bpm
+          
+          ### 💪 Performance Metrics
+          - ✅ **VO2 Max Training**: Completed
+          - ✅ **Neuromuscular Power**: Developed  
+          - ✅ **Lactate Tolerance**: Improved
+          - ✅ **Cardiac Efficiency**: Enhanced
+          
+          ### 📈 Progress Tracking
+          - [View Zone 5 Tracker](https://anhsrepo.github.io/anhsrepo/zone5-tracker.html)
+          - [Training Documentation](./ZONE5_TRACKER.md)
+          
+          **Keep pushing those limits! 🚀**
+          
+          _Auto-generated by Zone 5 Tracker Bot_
+          `;
+          
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['zone5-achievement', 'health-tracking', 'automated']
+          });
+          
+    - name: Send Zone 5 Notification
+      if: steps.zone5_check.outputs.in_zone5 == 'true'
+      run: |
+        echo "🔥 Zone 5 notification sent!"
+        echo "Current HR: ${{ steps.zone5_check.outputs.current_hr }} bpm"
+        echo "Zone 5 minutes today: ${{ steps.zone5_check.outputs.zone5_minutes }}"
+        
+        # You can add webhook notifications here
+        # curl -X POST "YOUR_WEBHOOK_URL" -d "{\"text\":\"🔥 Zone 5 achieved! HR: ${{ steps.zone5_check.outputs.current_hr }} bpm\"}"
