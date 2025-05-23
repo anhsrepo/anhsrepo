@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zone 5 Heart Rate Tracker</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #0d1117;
+            color: #e6edf3;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .zone-info {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d4aa;
+        }
+        
+        .contribution-graph {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .graph-container {
+            overflow-x: auto;
+        }
+        
+        .graph-grid {
+            display: grid;
+            grid-template-columns: repeat(53, 12px);
+            grid-template-rows: repeat(7, 12px);
+            gap: 2px;
+            margin: 20px 0;
+        }
+        
+        .day-cell {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            background: #161b22;
+            border: 1px solid #30363d;
+        }
+        
+        .day-cell.level-0 { background: #161b22; }
+        .day-cell.level-1 { background: #0e4429; }
+        .day-cell.level-2 { background: #006d32; }
+        .day-cell.level-3 { background: #26a641; }
+        .day-cell.level-4 { background: #39d353; }
+        
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .legend-item {
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+        }
+        
+        .file-input {
+            margin: 20px 0;
+            padding: 10px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            width: 100%;
+        }
+        
+        .button {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px 5px;
+        }
+        
+        .button:hover {
+            background: #2ea043;
+        }
+        
+        .today-status {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .zone5-achieved {
+            background: linear-gradient(45deg, #238636, #2ea043);
+            color: white;
+        }
+        
+        .zone5-not-achieved {
+            background: linear-gradient(45deg, #da3633, #f85149);
+            color: white;
+        }
+        
+        .real-time-data {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏃‍♂️ Zone 5 Heart Rate Tracker</h1>
+            <p>Monitoring cardiovascular performance with GitHub-style visualization</p>
+        </div>
+        
+        <div class="zone-info">
+            <h2>Your Heart Rate Zones (Age: 30)</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">190</div>
+                    <div>Max HR (bpm)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">171-190</div>
+                    <div>Zone 5 Range</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="todayMaxHR">--</div>
+                    <div>Today's Max</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="zone5Minutes">--</div>
+                    <div>Zone 5 Minutes</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="today-status" id="todayStatus">
+            <div class="pulse">📊 Upload your Apple Health data to see today's Zone 5 status</div>
+        </div>
+        
+        <div class="real-time-data">
+            <h3>📱 Apple Health Data Import</h3>
+            <p>Export your Apple Health data and upload the XML file here:</p>
+            <input type="file" id="healthDataFile" class="file-input" accept=".xml" />
+            <button class="button" onclick="processHealthData()">Analyze Health Data</button>
+            <button class="button" onclick="generateMockData()">Generate Demo Data</button>
+        </div>
+        
+        <div class="contribution-graph">
+            <h3>Zone 5 Achievement Calendar (GitHub Style)</h3>
+            <p>Darker squares = more time spent in Zone 5</p>
+            <div class="graph-container">
+                <div class="graph-grid" id="contributionGrid"></div>
+                <div class="legend">
+                    <span>Less</span>
+                    <div class="legend-item day-cell level-0"></div>
+                    <div class="legend-item day-cell level-1"></div>
+                    <div class="legend-item day-cell level-2"></div>
+                    <div class="legend-item day-cell level-3"></div>
+                    <div class="legend-item day-cell level-4"></div>
+                    <span>More</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="zone-info">
+            <h3>🎯 Zone 5 Training Benefits</h3>
+            <ul>
+                <li><strong>VO2 Max Improvement:</strong> Enhances maximum oxygen uptake</li>
+                <li><strong>Neuromuscular Power:</strong> Develops explosive strength</li>
+                <li><strong>Lactate Tolerance:</strong> Improves high-intensity performance</li>
+                <li><strong>Cardiac Output:</strong> Maximizes heart pumping efficiency</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Heart rate zones for 30-year-old
+        const MAX_HR = 190; // 220 - 30
+        const ZONE5_MIN = 171; // 90% of max HR
+        const ZONE5_MAX = 190; // 100% of max HR
+        
+        let healthData = [];
+        let zone5Data = {};
+        
+        function initializeGrid() {
+            const grid = document.getElementById('contributionGrid');
+            const today = new Date();
+            const startDate = new Date(today.getFullYear(), 0, 1); // Start of year
+            
+            // Create 371 cells (53 weeks * 7 days)
+            for (let i = 0; i < 371; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'day-cell level-0';
+                
+                const cellDate = new Date(startDate);
+                cellDate.setDate(startDate.getDate() + i);
+                
+                const dateStr = cellDate.toISOString().split('T')[0];
+                cell.setAttribute('data-date', dateStr);
+                cell.title = `${dateStr}: 0 minutes in Zone 5`;
+                
+                grid.appendChild(cell);
+            }
+        }
+        
+        function updateTodayStatus(zone5Minutes, maxHR) {
+            const statusEl = document.getElementById('todayStatus');
+            const todayMaxEl = document.getElementById('todayMaxHR');
+            const zone5MinutesEl = document.getElementById('zone5Minutes');
+            
+            todayMaxEl.textContent = maxHR || '--';
+            zone5MinutesEl.textContent = zone5Minutes || '--';
+            
+            if (zone5Minutes > 0) {
+                statusEl.className = 'today-status zone5-achieved';
+                statusEl.innerHTML = `🎉 Zone 5 ACHIEVED! ${zone5Minutes} minutes at ${ZONE5_MIN}-${ZONE5_MAX} bpm`;
+            } else {
+                statusEl.className = 'today-status zone5-not-achieved';
+                statusEl.innerHTML = `⏰ No Zone 5 time today. Push harder to reach ${ZONE5_MIN}+ bpm!`;
+            }
+        }
+        
+        function updateContributionGraph() {
+            const cells = document.querySelectorAll('.day-cell');
+            
+            cells.forEach(cell => {
+                const date = cell.getAttribute('data-date');
+                const minutes = zone5Data[date] || 0;
+                
+                // Determine intensity level (0-4)
+                let level = 0;
+                if (minutes > 0) level = 1;
+                if (minutes >= 5) level = 2;
+                if (minutes >= 15) level = 3;
+                if (minutes >= 30) level = 4;
+                
+                cell.className = `day-cell level-${level}`;
+                cell.title = `${date}: ${minutes} minutes in Zone 5`;
+            });
+        }
+        
+        function processHealthData() {
+            const fileInput = document.getElementById('healthDataFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select an Apple Health export file (.xml)');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(e.target.result, 'text/xml');
+                    
+                    // Parse heart rate records
+                    const heartRateRecords = xmlDoc.querySelectorAll('Record[type="HKQuantityTypeIdentifierHeartRate"]');
+                    
+                    healthData = [];
+                    zone5Data = {};
+                    
+                    heartRateRecords.forEach(record => {
+                        const startDate = record.getAttribute('startDate');
+                        const value = parseFloat(record.getAttribute('value'));
+                        
+                        const date = new Date(startDate);
+                        const dateStr = date.toISOString().split('T')[0];
+                        
+                        healthData.push({
+                            date: dateStr,
+                            time: date.toISOString(),
+                            heartRate: value,
+                            isZone5: value >= ZONE5_MIN && value <= ZONE5_MAX
+                        });
+                    });
+                    
+                    // Calculate Zone 5 minutes per day
+                    calculateZone5Minutes();
+                    updateVisualization();
+                    
+                } catch (error) {
+                    console.error('Error parsing health data:', error);
+                    alert('Error parsing health data. Please ensure you uploaded a valid Apple Health export file.');
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        function calculateZone5Minutes() {
+            const dailyZone5 = {};
+            
+            healthData.forEach(record => {
+                if (record.isZone5) {
+                    if (!dailyZone5[record.date]) {
+                        dailyZone5[record.date] = 0;
+                    }
+                    dailyZone5[record.date] += 1; // Assume 1 minute per reading
+                }
+            });
+            
+            zone5Data = dailyZone5;
+        }
+        
+        function updateVisualization() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayZone5 = zone5Data[today] || 0;
+            const todayMaxHR = Math.max(...healthData
+                .filter(r => r.date === today)
+                .map(r => r.heartRate)) || 0;
+            
+            updateTodayStatus(todayZone5, todayMaxHR > 0 ? Math.round(todayMaxHR) : null);
+            updateContributionGraph();
+        }
+        
+        function generateMockData() {
+            // Generate realistic mock data for demonstration
+            const today = new Date();
+            healthData = [];
+            zone5Data = {};
+            
+            for (let i = 0; i < 365; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                // Random chance of having Zone 5 training
+                if (Math.random() > 0.7) { // 30% chance of Zone 5 training
+                    const zone5Minutes = Math.floor(Math.random() * 45) + 5; // 5-50 minutes
+                    zone5Data[dateStr] = zone5Minutes;
+                    
+                    // Generate heart rate data for this day
+                    for (let j = 0; j < zone5Minutes; j++) {
+                        healthData.push({
+                            date: dateStr,
+                            time: date.toISOString(),
+                            heartRate: Math.floor(Math.random() * 20) + ZONE5_MIN,
+                            isZone5: true
+                        });
+                    }
+                }
+            }
+            
+            updateVisualization();
+            alert('Demo data generated! This shows a realistic year of Zone 5 training data.');
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeGrid();
+            updateTodayStatus(0, null);
+        });
+        
+        // Auto-refresh every minute to check for new data
+        setInterval(function() {
+            if (healthData.length > 0) {
+                updateVisualization();
+            }
+        }, 60000);
+    </script>
+</body>
+</html>
