@@ -6,6 +6,6 @@
 </div>
 
 
-I launched a couple of things in the past. I love interfacing with new internet and stem protocols. My personal philosophy (3,3) that I spent a lot of time rationalizing it
+I launched a couple of things in the past. I love interfacing with new stem protocols. My personal philosophy (3,3) that I spent a lot of time rationalizing it
 
 
