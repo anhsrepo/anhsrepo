@@ -6,6 +6,6 @@
 </div>
 
 
-I launched couple things in the parts. I love working with new tools. My personal philosophy (3,3) that I spent a lot of time rationalizing it
+I launched a couple of things in the past. I love working with new tools. My personal philosophy (3,3) that I spent a lot of time rationalizing it
 
 
