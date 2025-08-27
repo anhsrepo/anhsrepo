@@ -48,23 +48,33 @@ class AppleHealthZone5Monitor {
             window.webkit.messageHandlers && 
             window.webkit.messageHandlers.healthKit) {
             
-            // Request heart rate read permission
-            const permission = await new Promise((resolve) => {
-                window.webkit.messageHandlers.healthKit.postMessage({
-                    action: 'requestPermission',
-                    dataTypes: ['heartRate']
+            try {
+                // Request heart rate read permission
+                const permission = await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        reject(new Error('Permission request timeout'));
+                    }, 10000); // 10 second timeout
+                    
+                    window.webkit.messageHandlers.healthKit.postMessage({
+                        action: 'requestPermission',
+                        dataTypes: ['heartRate']
+                    });
+                    
+                    // Listen for response
+                    window.addEventListener('healthKitResponse', (event) => {
+                        clearTimeout(timeout);
+                        resolve(event.detail.authorized);
+                    }, { once: true });
                 });
                 
-                // Listen for response
-                window.addEventListener('healthKitResponse', (event) => {
-                    resolve(event.detail.authorized);
-                }, { once: true });
-            });
-            
-            return permission;
+                return permission;
+            } catch (error) {
+                console.error('HealthKit permission request failed:', error);
+                throw error;
+            }
         }
         
-        throw new Error('HealthKit not available');
+        throw new Error('HealthKit not available on this device/browser');
     }
 
     /**
@@ -158,15 +168,30 @@ class AppleHealthZone5Monitor {
      */
     async getCurrentHeartRate() {
         if (this.isIOSSafari() && window.webkit && window.webkit.messageHandlers.healthKit) {
-            return new Promise((resolve) => {
-                window.webkit.messageHandlers.healthKit.postMessage({
-                    action: 'getCurrentHeartRate'
+            try {
+                return new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        reject(new Error('Heart rate request timeout'));
+                    }, 5000); // 5 second timeout
+                    
+                    window.webkit.messageHandlers.healthKit.postMessage({
+                        action: 'getCurrentHeartRate'
+                    });
+                    
+                    window.addEventListener('heartRateUpdate', (event) => {
+                        clearTimeout(timeout);
+                        const heartRate = event.detail.heartRate;
+                        if (heartRate && typeof heartRate === 'number' && heartRate > 0) {
+                            resolve(heartRate);
+                        } else {
+                            reject(new Error('Invalid heart rate data received'));
+                        }
+                    }, { once: true });
                 });
-                
-                window.addEventListener('heartRateUpdate', (event) => {
-                    resolve(event.detail.heartRate);
-                }, { once: true });
-            });
+            } catch (error) {
+                console.warn('HealthKit heart rate fetch failed, using simulation:', error);
+                return this.simulateRealtimeHeartRate();
+            }
         }
         
         // Fallback: simulate realistic heart rate for demo
@@ -313,10 +338,33 @@ class AppleHealthZone5Monitor {
      */
     loadStoredData() {
         try {
+            if (typeof localStorage === 'undefined') {
+                console.warn('localStorage not available, using memory storage');
+                return {};
+            }
+            
             const stored = localStorage.getItem('zone5Achievements');
-            return stored ? JSON.parse(stored) : {};
+            if (!stored) {
+                return {};
+            }
+            
+            const parsed = JSON.parse(stored);
+            
+            // Validate data structure
+            if (typeof parsed !== 'object' || parsed === null) {
+                console.warn('Invalid stored data format, resetting');
+                return {};
+            }
+            
+            return parsed;
         } catch (error) {
             console.error('Error loading stored data:', error);
+            // Clear corrupted data
+            try {
+                localStorage.removeItem('zone5Achievements');
+            } catch (clearError) {
+                console.error('Failed to clear corrupted data:', clearError);
+            }
             return {};
         }
     }

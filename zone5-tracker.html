@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zone 5 Heart Rate Tracker</title>
+    <meta name="description" content="Real-time Zone 5 heart rate training tracker with Apple Health integration and GitHub-style contribution visualization">
+    <meta name="keywords" content="heart rate, zone 5, training, fitness, apple health, healthkit">
+    <meta name="author" content="anhsrepo">
+    <title>Zone 5 Heart Rate Tracker - Real-time Training Monitor</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
@@ -161,6 +164,24 @@
             50% { opacity: 0.5; }
             100% { opacity: 1; }
         }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            .pulse {
+                animation: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -182,11 +203,11 @@
                     <div>Zone 5 Range</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="todayMaxHR">--</div>
+                    <div class="stat-value" id="todayMaxHR" aria-label="Today's maximum heart rate">--</div>
                     <div>Today's Max</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value" id="zone5Minutes">--</div>
+                    <div class="stat-value" id="zone5Minutes" aria-label="Zone 5 training minutes today">--</div>
                     <div>Zone 5 Minutes</div>
                 </div>
             </div>
@@ -199,7 +220,9 @@
         <div class="real-time-data">
             <h3>📱 Apple Health Data Import</h3>
             <p>Export your Apple Health data and upload the XML file here:</p>
-            <input type="file" id="healthDataFile" class="file-input" accept=".xml" />
+            <label for="healthDataFile" class="sr-only">Apple Health Export File</label>
+            <input type="file" id="healthDataFile" class="file-input" accept=".xml" aria-describedby="file-help" />
+            <div id="file-help" style="font-size: 12px; color: #7d8590; margin-top: 5px;">Select your Apple Health export XML file</div>
             <button class="button" onclick="processHealthData()">Analyze Health Data</button>
             <button class="button" onclick="generateMockData()">Generate Demo Data</button>
         </div>
