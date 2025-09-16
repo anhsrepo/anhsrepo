@@ -36,8 +36,12 @@ class AppleHealthZone5Monitor {
      * Check if running on iOS Safari (HealthKit available)
      */
     isIOSSafari() {
+        if (typeof navigator === 'undefined' || typeof navigator.userAgent !== 'string') {
+            return false;
+        }
+
         const ua = navigator.userAgent;
-        return /iPad|iPhone|iPod/.test(ua) && /Safari/.test(ua);
+        return /iPad|iPhone|iPod/.test(ua) && /Safari/.test(ua) && !/Chrome|CriOS|FxiOS/.test(ua);
     }
 
     /**
@@ -288,6 +292,10 @@ class AppleHealthZone5Monitor {
      * Update real-time display
      */
     updateRealtimeDisplay(heartRate) {
+        if (typeof document === 'undefined') {
+            return; // No DOM available (e.g. during automated tests)
+        }
+
         const elements = {
             currentHR: document.getElementById('currentHeartRate'),
             zone5Status: document.getElementById('zone5Status'),
@@ -325,10 +333,16 @@ class AppleHealthZone5Monitor {
         }
         
         this.zone5Achievements[today] += session.zone5Minutes;
-        
-        // Save to localStorage
-        localStorage.setItem('zone5Achievements', JSON.stringify(this.zone5Achievements));
-        
+
+        // Save to localStorage when available
+        if (typeof localStorage !== 'undefined') {
+            try {
+                localStorage.setItem('zone5Achievements', JSON.stringify(this.zone5Achievements));
+            } catch (error) {
+                console.warn('Unable to persist Zone 5 achievements:', error);
+            }
+        }
+
         // Update contribution graph
         this.updateContributionGraph();
     }
@@ -373,8 +387,8 @@ class AppleHealthZone5Monitor {
      * Update GitHub-style contribution graph
      */
     updateContributionGraph() {
-        if (typeof updateContributionGraph === 'function') {
-            updateContributionGraph();
+        if (typeof window !== 'undefined' && typeof window.updateContributionGraph === 'function') {
+            window.updateContributionGraph();
         }
     }
 
