@@ -82,7 +82,7 @@ class GitHubStatsCollector:
             
             if response.status_code != 200:
                 raise Exception(f"GitHub API error: {response.status_code}")
-            
+
             events = response.json()
             
             # Count different event types from the last week
@@ -152,7 +152,7 @@ class ReadmeUpdater:
 def main():
     """Main execution function"""
     # Configuration
-    GITHUB_USERNAME = os.getenv('GITHUB_ACTOR', 'anhngit')
+    GITHUB_USERNAME = os.getenv('GITHUB_ACTOR', 'anhsrepo')
     GITHUB_TOKEN = os.getenv('GITHUB_TOKEN', '')
     HEALTH_DATA_PATH = os.getenv('HEALTH_DATA_PATH', 'apple_health_export.xml')
     

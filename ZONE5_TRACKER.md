@@ -3,7 +3,6 @@
 **Real-time Apple Health integration with GitHub-style contribution visualization**
 
 ![Zone 5 Tracker](https://img.shields.io/badge/Zone%205-171--190%20BPM-red)
-![Age](https://img.shields.io/badge/Age-30-blue)
 ![Max HR](https://img.shields.io/badge/Max%20HR-190%20BPM-orange)
 
 ## 🎯 What is Zone 5?
@@ -14,7 +13,7 @@ Zone 5 represents **90-100% of your maximum heart rate** - the highest intensity
 - **Lactate tolerance** - Ability to perform at high intensities
 - **Cardiac output maximization** - Peak heart pumping efficiency
 
-### Your Personal Zone 5 (Age 30)
+### Your Personal Zone 5
 - **Maximum Heart Rate**: 190 bpm (220 - 30)
 - **Zone 5 Range**: 171-190 bpm
 - **Target Duration**: 15-30 minutes per workout
