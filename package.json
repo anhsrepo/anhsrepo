@@ -1,0 +1,31 @@
+{
+  "name": "zone5-heart-rate-tracker",
+  "version": "1.0.0",
+  "description": "Zone 5 heart rate training tracker with Apple Health integration and GitHub-style contribution visualization",
+  "main": "apple-health-connector.js",
+  "scripts": {
+    "start": "open zone5-tracker.html || xdg-open zone5-tracker.html",
+    "update-readme": "python3 scripts/update_readme.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anhsrepo/anhsrepo.git"
+  },
+  "keywords": [
+    "heart-rate",
+    "zone5",
+    "training",
+    "fitness",
+    "apple-health",
+    "healthkit",
+    "vo2max",
+    "cardiovascular",
+    "health-tracking"
+  ],
+  "author": "anhsrepo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/anhsrepo/anhsrepo/issues"
+  },
+  "homepage": "https://github.com/anhsrepo/anhsrepo#readme"
+}
