@@ -99,19 +99,37 @@ function calculateStats(zone5Data) {
 }
 
 /**
+ * Check if two date strings are consecutive days
+ */
+function areConsecutiveDays(dateStr1, dateStr2) {
+  const d1 = new Date(dateStr1);
+  const d2 = new Date(dateStr2);
+  const diffTime = d2.getTime() - d1.getTime();
+  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+  return diffDays === 1;
+}
+
+/**
  * Calculate longest streak of 15+ minute days
  */
 function calculateLongestStreak(achievements) {
   const sortedDates = Object.keys(achievements).sort();
   let maxStreak = 0;
   let currentStreak = 0;
+  let previousDate = null;
 
   for (const date of sortedDates) {
     if (achievements[date] >= 15) {
-      currentStreak++;
+      if (previousDate === null || areConsecutiveDays(previousDate, date)) {
+        currentStreak++;
+      } else {
+        currentStreak = 1;
+      }
       maxStreak = Math.max(maxStreak, currentStreak);
+      previousDate = date;
     } else {
       currentStreak = 0;
+      previousDate = null;
     }
   }
 

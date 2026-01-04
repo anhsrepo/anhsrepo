@@ -4,6 +4,8 @@
   "description": "Zone 5 Heart Rate Training Tracker with GitHub-style contribution visualization",
   "main": "api/zone5-contributions.js",
   "scripts": {
+    "test": "node test-zone5.js",
+    "test:api": "node test-api.js",
     "dev": "vercel dev",
     "deploy": "vercel --prod"
   },
