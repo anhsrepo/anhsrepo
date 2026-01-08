@@ -6,7 +6,7 @@ AI-powered README updater with Apple Health integration
 import json
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
-import xrequests
+import requests
 import re
 import os
 
