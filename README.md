@@ -1,7 +1,6 @@
 # Zone 5 Heart Rate Training Tracker
 
-![Zone 5 Training Contributions](./test-output.svg)
-<!-- After deploying to Vercel, replace with: https://your-app.vercel.app/api/zone5-contributions -->
+![Zone 5 Training Contributions](https://anhsrepo-zone5-tracker.vercel.app/api/zone5-contributions)
 
 ## About
 
